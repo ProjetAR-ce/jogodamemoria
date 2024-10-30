@@ -1,57 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Modelo 3D Fixo com Coordenadas Mundiais</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
     <script>
-        // Função auxiliar para converter radianos em graus
-        function radToDeg(radians) {
-            return radians * (180 / Math.PI);
-        }
-
-        AFRAME.registerComponent("fixar-coordenadas-mundiais", {
+        AFRAME.registerComponent("mytarget", {
             init: function () {
                 this.el.addEventListener("targetFound", (event) => {
-                    console.log("QR code encontrado - fixando objeto no espaço mundial");
-
-                    const worldPosition = new THREE.Vector3();
-                    const worldQuaternion = new THREE.Quaternion();
-                    const worldScale = new THREE.Vector3();
-
-                    this.el.object3D.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
-
-                    const worldRotation = new THREE.Euler().setFromQuaternion(worldQuaternion, 'XYZ');
-
-                    this.el.setAttribute("position", `${worldPosition.x} ${worldPosition.y} ${worldPosition.z}`);
-                    this.el.setAttribute("rotation", `${radToDeg(worldRotation.x)} ${radToDeg(worldRotation.y)} ${radToDeg(worldRotation.z)}`);
-                    this.el.setAttribute("visible", "true");
+                    console.log("target found");
+                    const examplePlane = document.querySelector('#example-plane');
+                    examplePlane.addEventListener("click", event => {
+                        window.location.href = "https://www.instagram.com/projetar_ce";
+                        console.log("plane click");
+                    });
                 });
-
                 this.el.addEventListener("targetLost", (event) => {
-                    console.log("QR code perdido, mas o objeto permanece visível");
-                    this.el.setAttribute("visible", "true");
+                    console.log("target lost");
                 });
-            }
+            },
         });
     </script>
 </head>
 
 <body>
-    <a-scene mindar-image="imageTargetSrc: assets/markers/qrCode.mind; showStats: false; uiScanning: yes;" 
-             embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights"
-             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: assets/markers/qrCode.mind; showStats: false; uiScanning: yes;"
+        embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights"
+        vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
 
         <a-assets>
-            <a-asset-item id="logo-3d" src="assets/models/CottageFBX.glb"></a-asset-item>
+            
+            <a-asset-item id="logo-3d" src="assets/models/CottageFBX.glb"></a-asset-item> <!-- Adicionando o modelo 3D -->
         </a-assets>
 
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="near: 10; far: 10000; objects: .clickable"></a-camera>
 
-        <a-entity mindar-image-target="targetIndex: 0" position="0 0 0" fixar-coordenadas-mundiais>
-            <a-entity gltf-model="#logo-3d" position="0 0 0" rotation="180 180 -180" scale="1 1 1"></a-entity>
+        <a-entity id="mytarget" mytarget mindar-image-target="targetIndex: 0">
+            <a-entity gltf-model="#logo-3d" position="0 0 0" rotation="180 180 -180" scale="1 1 1"
+                      animation="property: rotation; to: 0 0 0;"></a-entity> <!-- Adicionando a animação de rotação -->
         </a-entity>
     </a-scene>
 </body>
